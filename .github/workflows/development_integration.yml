@@ -1,0 +1,27 @@
+name: development integration
+
+on:
+  workflow_call:
+     
+    outputs:
+      semVer:
+        description: "Semantic Versioning"
+        value: ${{ jobs.get-version.outputs.semVer }}
+
+jobs:
+  
+  build-react:
+    name: Build angular
+    uses: ./.github/workflows/build-react.yml
+    secrets: inherit
+
+ 
+
+  
+    
+
+   
+
+      
+
+
