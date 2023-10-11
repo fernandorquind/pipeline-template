@@ -17,11 +17,11 @@ jobs:
         name: build
         path: .
     - name: Configuration AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET}}
-        aws-region: us-east-1
+      run: |
+        aws configure set aws_access_key_id ${{secrets.AWS_KEY_ID}}
+        aws configure set aws_secret_access_key ${{secrets.AWS_SECRET}}
+        aws configure set aws_session_token ${{secrets.AWS_TOKEN}}
+      
 
     - name: Login to Amazon ECR
       id: login-ecr
