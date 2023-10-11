@@ -16,6 +16,12 @@ jobs:
       with:
         name: build
         path: .
+
+    - name: Configure AWS CLI with SSO
+      run: |
+        aws configure sso --start-url https://quind.awsapps.com/start# --region us-east-1
+        aws sso login --account-id 0704-1068-0102 
+
     - name: Login to Amazon ECR
       run: |
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 070410680102.dkr.ecr.us-east-1.amazonaws.com
