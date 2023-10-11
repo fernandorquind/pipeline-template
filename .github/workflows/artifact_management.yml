@@ -1,0 +1,30 @@
+name: artifact-management
+
+on:
+  workflow_call:
+
+jobs:
+  artifact-management:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: download-artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: .
+    - name: Configuration AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET}}
+        aws-token: ${{ secrets.AWS_TOKEN }}
+    
+    
+
+
+
+

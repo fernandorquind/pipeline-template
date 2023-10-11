@@ -9,6 +9,12 @@ jobs:
     name: development_integration
     uses: ./.github/workflows/development_integration.yml
     secrets: inherit
+  artifact-management:
+    if:  github.ref_name == 'main'  
+    needs: development-integration
+    name: artifact-management
+    uses: ./.github/workflows/artifact_management.yml
+    secrets: inherit
 
  
       
