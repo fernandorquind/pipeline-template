@@ -16,12 +16,20 @@ jobs:
       with:
         name: build
         path: .
-    - name: Configuration AWS CLI
-      run: |
-        aws configure set aws_access_key_id ${{secrets.AWS_KEY_ID}}
-        aws configure set aws_secret_access_key ${{secrets.AWS_SECRET}}
-        aws configure set aws_session_token ${{secrets.AWS_TOKEN}}
-      
+
+    - name: 'Get Login to AWS ECR'
+      id: ecr-login
+      uses: thalesvon/ecr-login@master
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
+        AWS_DEFAULT_OUTPUT: json
+        AWS_REGION: us-east-1
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
+      with:
+        args: 'get-login --no-include-email --region ${AWS_REGION}'
+
+    - name: 'Docker Login'
+      run: ${{ steps. ecr-login.outputs.login-string }}
 
     - name: Login to Amazon ECR
       id: login-ecr
