@@ -1,0 +1,41 @@
+on:
+  workflow_call:
+    inputs:
+      ui_test:
+        description: 'ui test'
+        type:  boolean 
+      integration:
+        description: 'integration'
+        type:  boolean
+      zaproxy:
+        description: 'Dynamic security scan'
+        type: boolean
+
+jobs:
+  zaproxy-security:
+    name: Zaproxy security
+    if: inputs.zaproxy == true
+    uses: ./.github/workflows/qa-owasp-zaproxy.yml
+    secrets: inherit
+
+  ui-test:
+    name: UI test
+    if: inputs.ui_test == true
+    uses: ./.github/workflows/qa-uitest.yml
+    secrets: inherit
+
+  integration-test:
+    name: Integration test
+    if: inputs.integration == true
+    uses: ./.github/workflows/qa-integration.yml
+    secrets: inherit
+    
+  Message:
+    name: Message
+    runs-on: ubuntu-latest
+    if: inputs.integration == false
+    steps:
+    - name: mensaje 
+      run: echo "no hay pruebas de integración habilitadas"
+     
+  

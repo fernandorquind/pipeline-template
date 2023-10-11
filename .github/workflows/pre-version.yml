@@ -1,0 +1,67 @@
+name: pre-version
+
+on:
+  workflow_call:
+    outputs:
+      source:
+        description: "Semantic Versioning"
+        value: ${{ jobs.pre-version.outputs.source }}
+      
+       
+jobs:
+  pre-version:
+    runs-on: ubuntu-latest
+    env:
+      run_id: ${GITHUB_RUN_ID}
+    outputs:
+      source: ${{ steps.source-branch.outputs.source }}
+    steps:
+
+    - name: Checkout to project repository 
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.TOKEN_TEMPLATE }} # `GH_PAT` is a secret that contains your PAT
+        ref: ${{ github.ref_name }}
+
+    - name: Repository name
+      id: extract_repo_name
+      run: echo "repo_name=$(echo ${GITHUB_REPOSITORY} | sed 's:.*/::')" >> $GITHUB_OUTPUT
+    
+    - name: Setear nombre de la rama en variable de entorno
+      id: source-branch
+      run: | 
+        TOKEN=${{ secrets.TOKEN_TEMPLATE }}
+        OWNER=${{ github.REPOSITORY_OWNER }}
+        REPO=${{ steps.extract_repo_name.outputs.repo_name }}
+        LATEST_PR=$(curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/repos/$OWNER/$REPO/pulls?state=all&sort=created&direction=desc&page=1&per_page=1")
+        SOURCE_BRANCH=$(echo $LATEST_PR | jq -r '.[0].head.ref')
+        if [[ $SOURCE_BRANCH == release* ]]; then
+          echo "::set-output name=source::release"
+          echo 
+
+        elif [[ $SOURCE_BRANCH == hotfix* ]]; then
+          echo "::set-output name=source::hotfix"
+        else 
+          echo "Not a release branch."
+        fi
+
+  get-version-release-main:
+    needs: pre-version
+    if: (github.ref_name == 'main') && (needs.pre-version.outputs.source == 'release')
+    name: Get version
+    uses: ./.github/workflows/semantic-versioning.yml
+    with:
+      dry_run: false
+      bump: minor
+    secrets: inherit
+  get-version-hotfix-main:
+    needs: pre-version
+    if: (github.ref_name == 'main') && (needs.pre-version.outputs.source == 'hotfix')
+    name: Get version
+    uses: ./.github/workflows/semantic-versioning.yml
+    with:
+      dry_run: false
+      bump: patch
+    secrets: inherit

@@ -1,0 +1,55 @@
+name: Subir compilado a S3 y publicarlo en CloudFront
+
+on:
+  workflow_call:
+    
+jobs:
+  deploy-cloudfront:
+    name: deploy s3 cloudfront  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact-build
+          path: ${{ vars.BUILD }}/
+
+      - name: Configurar AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_CER }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_CER }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+        
+
+      - name: Cargar archivos compilados a S3 dev
+        if: github.ref_name == 'develop'
+        run: |
+          aws s3 sync ${{ vars.BUILD }}/ s3://dev-${{ vars.bucket }}/
+      - name: Cargar archivos compilados a S3 cert
+        if: startsWith(github.ref_name, 'release')
+        run: |
+          aws s3 sync ${{ vars.BUILD }}/ s3://cert-${{ vars.bucket }}/
+          
+      - name: Cargar archivos compilados a S3 prod
+        if: github.ref_name == 'main'
+        run: |
+          aws s3 sync ${{ vars.BUILD }}/ s3://prod-${{ vars.bucket }}/
+    
+      - name: Invalidar cache en CloudFront develop
+        if: github.ref_name == 'develop'
+        run: |
+          DISTRIBUTION=$(aws cloudfront list-distributions --query 'DistributionList.Items[?Aliases.Items[0]==`dev-${{ vars.ENDPOINT }}`].Id' --output text)
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*"
+      
+      - name: Invalidar cache en CloudFront release
+        if: startsWith(github.ref_name, 'release')
+        run: |
+          DISTRIBUTION=$(aws cloudfront list-distributions --query 'DistributionList.Items[?Aliases.Items[0]==`cert-${{ vars.ENDPOINT }}`].Id' --output text)
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*"
+
+      - name: Invalidar cache en CloudFront produccion 
+        if: github.ref_name == 'main'
+        run: |
+          DISTRIBUTION=$(aws cloudfront list-distributions --query 'DistributionList.Items[?Aliases.Items[0]==`${{ vars.ENDPOINT }}`].Id' --output text)
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION --paths "/*"
+      

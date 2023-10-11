@@ -1,0 +1,175 @@
+name: pipeline-template
+
+on: 
+  workflow_call:
+    inputs:
+      trigger:
+        description: 'trigger'
+        required: true
+        type: string
+      languages:
+        description: 'type language'
+        default: 'javascript'
+        required: true
+        type: string
+      typerelease:
+        description: 'type release'
+        required: true
+        type: string
+      integration:
+        description: 'integration'
+        default: true
+        type:  boolean
+      unit_test:
+        description: 'unit test'
+        default: true
+        type:  boolean
+      ui_test:
+        description: 'UI test'
+        default: true
+        type:  boolean
+      quality_gate:
+        description: 'Quality gate boolean'
+        default: true
+        type:  boolean
+      zaproxy:
+        description: 'Dynamic security test'
+        default: true
+        type: boolean
+      component:
+        description: 'component'
+        default: false
+        type:  boolean
+      framework:
+        description: 'framework'
+        required: true
+        type: string
+
+jobs:
+  development-integration:
+    if: startsWith(github.ref_name, 'feature/') || github.ref_name == 'develop' || startsWith(github.ref_name, 'release') || github.ref_name == 'main'  || github.ref_name == 'master' ||  startsWith(github.ref_name, 'hotfix') 
+    name: development_integration
+    uses: ./.github/workflows/development_integration_frontend.yml
+    with:
+      languages:  ${{ inputs.languages }}
+      unit_test: ${{ inputs.unit_test }}
+      quality_gate: ${{ inputs.quality_gate }}
+    secrets: inherit
+
+  technical-excellence-assurance:
+    name: Technical excellence assurance
+    if:   inputs.trigger == 'develop'
+    needs: development-integration
+    uses: ./.github/workflows/qa-dependency-check.yml
+
+
+  deploy-dev:
+    name: deploy dev
+    needs: technical-excellence-assurance
+    uses: ./.github/workflows/deploy-s3-cloudfront.yml
+    if: github.ref_name == 'develop'
+    secrets: inherit
+
+  deploy:
+    name: deployment
+    needs: development-integration
+    uses: ./.github/workflows/deploy-s3-cloudfront.yml
+    if: startsWith(github.ref_name, 'release') || github.ref_name == 'main'
+    secrets: inherit
+
+  test-post-deploy:
+    needs: deploy
+    if: startsWith(github.ref_name, 'release')
+    name: zaproxy and ui-test
+    uses: ./.github/workflows/test-post-deploy.yml
+    with:
+      zaproxy: ${{ inputs.zaproxy }}
+      ui_test: ${{ inputs.ui_test }}
+      integration: ${{ inputs.integration }}
+    secrets: inherit
+
+  test-hotfix:
+    name:  test-post-deploy
+    needs:  ['development-integration']
+    if: startsWith (github.ref_name,'hotfix')
+    uses: ./.github/workflows/test-post-deploy.yml
+    with:
+      ui_test: false
+      integration: ${{ inputs.integration }}
+      zaproxy: false
+    secrets: inherit
+
+  create-release-branch:
+    name: create release branch
+    needs: ['development-integration', 'deploy-dev']
+    if: github.ref_name == 'develop' 
+    uses: ./.github/workflows/create-release-branch.yml
+    with:
+      SemVer: ${{ needs.development-integration.outputs.semVer }}
+
+  semantic-version:
+    name: Semantic version
+    if: github.ref_name == 'main'
+    needs: deploy
+    uses: ./.github/workflows/semantic-versioning.yml
+    with:
+      dry_run: false
+    secrets: inherit
+
+  auto-pr:
+    name: auto pull request
+    needs:  ['development-integration', 'create-release-branch']
+    if: github.ref_name == 'develop' 
+    uses: ./.github/workflows/pull-request.yml
+    with:
+      SemVer: ${{ needs.development-integration.outputs.semVer }}
+    secrets: inherit
+  
+
+  auto-pr-main:
+    name: Auto pull request release to main
+    needs: ['development-integration', 'deploy']
+    if: startsWith(github.ref_name, 'release')
+    uses: ./.github/workflows/pull-request.yml
+    with:
+      SemVer: ${{ needs.development-integration.outputs.semVer }}
+    secrets: inherit
+
+  auto-pr-dev:
+    name: Auto pull request hotfix to dev and to main
+    needs: ['development-integration'] ##'test-post-deploy',
+    if: startsWith(github.ref_name, 'hotfix')
+    uses: ./.github/workflows/pull-request.yml
+    with:
+      SemVer: ${{ needs.development-integration.outputs.semVer }}
+    secrets: inherit
+
+ 
+
+
+
+ 
+
+
+
+
+
+   
+
+      
+
+
+
+
+      
+
+
+
+      
+
+      
+        
+      
+
+  
+  

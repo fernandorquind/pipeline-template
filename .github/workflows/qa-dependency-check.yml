@@ -1,0 +1,51 @@
+on:
+  workflow_call:
+    
+jobs:
+  depchecktest:
+    runs-on: ubuntu-latest
+    name: dependency-check
+    env:
+      versionAngular: ${{ vars.VERSIONANGULAR }}
+    steps:
+      - name: Checkout to project repository 
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref_name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ vars.VERSIONNODE}}.x
+      ##toca condicionarlo dependiendo del lenguaje y el build  ##npm install npm@latest -g
+      - run: ls
+      - name: packages node install 
+        run: |
+          if [[ ${{ env.versionAngular }} > 10 ]]; then
+            echo "Instalando dependencias de Angular"
+            npm install -g
+          else
+            echo "Instalando dependencias de Grunt"
+            npm install --save --legacy-peer-deps
+          fi
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: '${{ github.repository }}'
+          path: '.'
+          format: 'HTML'
+          out: 'reports' # this is the default, no need to specify unless you wish to override it
+          args: >
+            --enableRetired
+            --failOnCVSS ${{ vars.DEPCHECK }}
+
+      - name: Upload Test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v3.1.2
+        with:
+           name: Depcheck report
+           path: ./reports
+           retention-days: 3

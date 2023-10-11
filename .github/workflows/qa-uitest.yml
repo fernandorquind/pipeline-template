@@ -1,0 +1,39 @@
+name: pruebas UI
+on:
+  workflow_call:
+
+jobs:
+  ui-test:
+    runs-on: ubuntu-latest
+    name: UI test
+    steps:
+      - name: Checkout private tools
+        uses: actions/checkout@v3
+        with:
+          repository: f2x-flypass/${{ vars.UI_REPOSITORY }}
+          token: ${{ secrets.TOKEN_TEMPLATE }} # `GH_PAT` is a secret that contains your PAT
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+      - name: npm install
+        run: |
+          npm install npm@latest -g
+          npm install
+      - name: Run success case
+        run: |
+          npm run ${{ vars.RUN_UI_TEST }}
+      - name: Run success case html
+        run: |
+          npm run test:report
+      - uses: deblockt/cucumber-report-annotations-action@v1.7
+        with:
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+          path: "jsonlogs/**.json"
+      - name: Publish cucumber report
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: Report-UI
+          path: ./reports
+          retention-days: 1

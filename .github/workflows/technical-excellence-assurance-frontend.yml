@@ -1,0 +1,16 @@
+on:
+  workflow_call:
+    inputs:
+      trigger:
+        description: 'trigger'
+        required: true
+        type: string
+    
+
+jobs:
+  dependency-check:
+    name: dependency-check
+    uses: ./.github/workflows/qa-dependency-check.yml
+ 
+  
+  

@@ -1,0 +1,32 @@
+name: Crear Branch Release
+
+on:
+  workflow_call:
+    inputs:
+      semVer:
+        description: 'Semantic Versioning'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    name: Create release branch
+    runs-on: ubuntu-latest
+    env:
+      run_id: ${GITHUB_RUN_ID}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Crear Branch Release
+        run: |
+          if [ -n "$(git ls-remote --heads origin release/* )" ]; then
+            echo "Release branch exist"
+            exit 1
+          else
+            git fetch
+            git checkout -b release/${{ inputs.semVer }} 
+            git push -u origin release/${{ inputs.semVer }}
+          fi

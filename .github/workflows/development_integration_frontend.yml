@@ -1,0 +1,73 @@
+name: development integration
+
+on:
+  workflow_call:
+    inputs:
+      languages: 
+        description: 'languages'
+        required: true
+        type: string
+      unit_test:
+        description: 'unit test'
+        default: true
+        type:  boolean
+      quality_gate:
+        description: 'Quality gate boolean'
+        default: true
+        type:  boolean
+     
+    outputs:
+      semVer:
+        description: "Semantic Versioning"
+        value: ${{ jobs.get-version.outputs.semVer }}
+
+jobs:
+  delete-branch-release:
+    name: Delete branch release
+    if: github.ref_name  == 'main'
+    uses: ./.github/workflows/delete-branch-release.yml
+    needs: get-version
+    with:
+      SemVer: ${{ needs.get-version.outputs.semVer }}
+    secrets: inherit
+    
+  delete-branches:
+    name: delete branches
+    if: github.ref_name  == 'develop'
+    uses: ./.github/workflows/delete-branches.yml
+    secrets: inherit
+  
+  build-angular:
+    name: Build angular
+    uses: ./.github/workflows/build-angular.yml
+    secrets: inherit
+
+  sonar-action:
+    needs: build-angular
+    if: github.ref_name  == 'develop' ||  startsWith(github.ref_name, 'feature') ||  startsWith(github.ref_name, 'hotfix')
+    name: Sonarcloud and unitTest
+    uses: ./.github/workflows/sonarcloud-frontend.yml
+    with:
+      unit_test: ${{ inputs.unit_test }}
+      quality_gate: ${{ inputs.quality_gate }}
+    secrets: inherit
+
+  get-version:
+    name: Get version
+    needs: build-angular
+    if: startsWith(github.ref_name, 'feature') == false && startsWith(github.ref_name, 'hotfix') == false
+    uses: ./.github/workflows/semantic-versioning.yml
+    with:
+      dry_run: true
+    secrets: inherit
+
+
+
+  
+    
+
+   
+
+      
+
+

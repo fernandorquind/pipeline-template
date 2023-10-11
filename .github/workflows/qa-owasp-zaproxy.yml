@@ -1,0 +1,33 @@
+on:
+  workflow_call: 
+jobs:
+  Dynamic_Security:
+    env:
+      ENDPOINT: ${{ vars.ENDPOINT }}
+    name: Dynamic Security Analisys
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to project repository 
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: ${{ github.REPOSITORY }}
+          ref: ${{ github.ref_name }}
+      - name: Dynamic Scan
+        if: startsWith(env.ENDPOINT,'test.')
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: http://${{ vars.ENDPOINT }}
+          fail_action: true
+          cmd_options: '-a -I -s' 
+         
+      - name: Dynamic Scan
+        if: endsWith( env.ENDPOINT ,'flypass.com.co')
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: ' https://dev-${{ vars.ENDPOINT }}'
+          fail_action: true
+          cmd_options: '-a -I -s' 
+          

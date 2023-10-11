@@ -1,0 +1,44 @@
+on:
+  workflow_call:
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    name: delete branch
+    env:
+      run_id: ${GITHUB_RUN_ID}
+    steps:
+      - name: Checkout to project repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref_name }}
+
+      - name: Get Stale Branches
+        id: stale_branches
+        run: |
+          STALE_THRESHOLD=$(date --date="-1 month" +%Y-%m-%d)
+          git branch -r | grep 'origin/feature/' | awk '{print $1}' | sed 's/origin\///' > branches.txt
+          git branch -r | grep 'origin/hotfix/' | awk '{print $1}' | sed 's/origin\///' >> branches.txt
+          cat branches.txt | while read -r branch; do
+            LAST_COMMIT_DATE=$(git log -1 --format=%cd --date=format:"%Y-%m-%d" origin/"$branch")
+            if [[ "$LAST_COMMIT_DATE" < "$STALE_THRESHOLD" ]]; then
+              echo "$branch" >> branches_to_delete.txt
+            fi
+          done
+          file=branches_to_delete.txt
+          if [ -f "$file" ];then 
+            cat branches_to_delete.txt
+            BRANCHES=$(cat branches_to_delete.txt)
+            for branch in $BRANCHES; do
+              git push origin --delete "$branch"
+            done
+          else 
+            echo "ninguna rama sobrepasa el tiempo limite para ser eliminada"
+            exit 0
+          fi
+
+      
+      
+          
