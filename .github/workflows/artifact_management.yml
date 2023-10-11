@@ -16,6 +16,9 @@ jobs:
       with:
         name: build
         path: ./build
+    
+    - name: Structure files
+      run: ls -R
 
     - name: Configure AWS credentials from Test account
       uses: aws-actions/configure-aws-credentials@v4
