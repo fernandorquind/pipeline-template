@@ -3,6 +3,10 @@ name: artifact-management
 on:
   workflow_call:
 
+permissions:
+  id-token: write
+  contents: read
+  
 jobs:
   artifact-management:
     runs-on: ubuntu-latest
