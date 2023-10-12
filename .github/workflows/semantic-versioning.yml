@@ -34,4 +34,5 @@ jobs:
 
     - name: Display GitVersion outputs (step output)
       run: |
-        echo "SemVer: ${{ steps.gitversion.outputs.semVer.GitVersion_SemVer }}"
+        echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+        echo "GitVersion_SemVer: ${{ env.GitVersion_SemVer }}"
