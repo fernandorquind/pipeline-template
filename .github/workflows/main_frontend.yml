@@ -4,13 +4,11 @@ on:
   workflow_call:
     
 jobs:
-  development-integration:
-    if:  github.ref_name == 'main'  
+  development-integration: 
     name: development_integration
     uses: ./.github/workflows/development_integration.yml
     secrets: inherit
   artifact-management:
-    if:  github.ref_name == 'main'  
     needs: development-integration
     name: artifact-management
     uses: ./.github/workflows/artifact_management.yml
