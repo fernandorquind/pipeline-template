@@ -2,18 +2,20 @@ name: development integration
 
 on:
   workflow_call:
-     
-    outputs:
-      semVer:
-        description: "Semantic Versioning"
-        value: ${{ jobs.get-version.outputs.semVer }}
 
 jobs:
-  
+  version:
+    name: versionamiento semantico
+    uses: ./.github/workflows/semantic-versioning.yml
+    secrets: inherit
+
   build-react:
+    needs: version 
     name: Build angular
     uses: ./.github/workflows/build-react.yml
     secrets: inherit
+  
+
 
  
 
