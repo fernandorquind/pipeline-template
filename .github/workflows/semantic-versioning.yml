@@ -10,14 +10,14 @@ jobs:
     - name: Checkout to project repository 
       uses: actions/checkout@v3
 
-    - name: GitHub Tag 
-      id: tagger
-      uses: mathieudutour/github-tag-action@v6.1
-      with:
-        github_token: ${{ secrets.TOKEN_TALLER }}
-        dry_run:  false
-        release_branches: feature/*,main
-        default_bump: minor
+    # - name: GitHub Tag 
+    #   id: tagger
+    #   uses: mathieudutour/github-tag-action@v6.1
+    #   with:
+    #     github_token: ${{ secrets.TOKEN_TALLER }}
+    #     dry_run:  false
+    #     release_branches: feature/*,main
+    #     default_bump: minor
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0
