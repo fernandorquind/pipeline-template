@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/artifact_management.yml
     secrets: inherit
     with:
-      semver: ${{needs.development-integration.outputs.semv}}
+      semver: ${{ needs.development-integration.outputs.semv }}
 
  
       
