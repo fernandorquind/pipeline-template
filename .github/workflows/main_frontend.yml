@@ -12,6 +12,8 @@ jobs:
     needs: development-integration
     name: artifact-management
     uses: ./.github/workflows/artifact_management.yml
+    with:
+      semver: ${{ needs.development-integration.outputs.semver }}
     secrets: inherit
 
  
