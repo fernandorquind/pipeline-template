@@ -2,11 +2,10 @@ name: development integration
 
 on:
   workflow_call:
-    inputs:
-      semantic:
+    outputs:
+      semv:
         description: 'semantic version'
-        required: true
-        type: string
+        values: ${{jobs.version.outputs.}}
 jobs:
   version:
     name: versionamiento semantico
