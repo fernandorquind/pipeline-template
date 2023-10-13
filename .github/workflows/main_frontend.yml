@@ -2,7 +2,10 @@ name: pipeline-template
 
 on: 
   workflow_call:
-    
+    outputs:
+      semv:
+        description: 'semantic version'
+        value: ${{ jobs.version.outputs.semv }}
 jobs:
   development-integration: 
     name: development_integration
