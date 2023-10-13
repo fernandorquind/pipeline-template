@@ -2,13 +2,17 @@ name: semantic-versioning
 
 on:
   workflow_call:   
+    outputs:
+      SemVer:
+        description: "Versionamiento semantico"
+        value: ${{jobs.semantic-versioning.outputs.SemVer}}
 
 jobs:
   semantic-versioning:
     runs-on: ubuntu-latest
     outputs:
       SemVer: ${{ steps.gitversion.outputs.semVer }}
-      
+
     steps:
     - name: Checkout to project repository 
       uses: actions/checkout@v3
