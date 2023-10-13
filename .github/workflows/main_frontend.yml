@@ -2,6 +2,10 @@ name: pipeline-template
 
 on: 
   workflow_call:
+    outputs:
+        semver:
+          description: "versionamiento semantico"
+          value: ${{ jobs.development-integration.outputs.semver }}
     
     
 jobs:
