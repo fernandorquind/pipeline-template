@@ -6,6 +6,9 @@ on:
 jobs:
   semantic-versioning:
     runs-on: ubuntu-latest
+    outputs:
+      SemVer: ${{ steps.gitversion.outputs.semVer }}
+      
     steps:
     - name: Checkout to project repository 
       uses: actions/checkout@v3
