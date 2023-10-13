@@ -5,7 +5,7 @@ on:
     inputs:
       SemVer:
         description: "Versionamiento semantico"
-        value: string
+        type: string
 
 jobs:
   artifact-management:
