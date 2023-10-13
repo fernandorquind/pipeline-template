@@ -2,7 +2,11 @@ name: development integration
 
 on:
   workflow_call:
-
+    inputs:
+      semantic:
+        description: 'semantic version'
+        required: true
+        type: string
 jobs:
   version:
     name: versionamiento semantico
