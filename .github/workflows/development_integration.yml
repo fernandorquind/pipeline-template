@@ -5,7 +5,7 @@ on:
     outputs:
       semv:
         description: 'semantic version'
-        values: ${{jobs.version.outputs.}}
+        values: ${{ jobs.version.outputs.semv }}
 jobs:
   version:
     name: versionamiento semantico
