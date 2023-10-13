@@ -2,10 +2,6 @@ name: pipeline-template
 
 on: 
   workflow_call:
-    outputs:
-      semv:
-        description: 'semantic version'
-        value: ${{ jobs.version.outputs.semv }}
 jobs:
   development-integration: 
     name: development_integration
@@ -16,6 +12,8 @@ jobs:
     name: artifact-management
     uses: ./.github/workflows/artifact_management.yml
     secrets: inherit
+    with:
+      semver: ${{needs.development-integration.outputs.semv}}
 
  
       
