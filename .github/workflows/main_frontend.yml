@@ -2,6 +2,11 @@ name: pipeline-template
 
 on: 
   workflow_call:
+    outputs: 
+      semVer: 
+        description: "job1"
+        value: ${{ jobs.development-integration.outputs.semVer }}
+
     
 jobs:
   development-integration: 
@@ -12,6 +17,8 @@ jobs:
     needs: development-integration
     name: artifact-management
     uses: ./.github/workflows/artifact_management.yml
+    with:
+      semVer: ${{ needs.development-integration.outputs.semVer }}
     secrets: inherit
 
  

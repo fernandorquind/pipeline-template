@@ -2,6 +2,11 @@ name: artifact-management
 
 on:
   workflow_call:
+    inputs: 
+      semVer: 
+        description: "versionamiento semantico"
+        type: string
+
 
 jobs:
   artifact-management:
@@ -36,7 +41,7 @@ jobs:
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         REPOSITORY: calculadora
-        IMAGE_TAG: ${{ github.sha }} ##"reemplazar versionamiento semantico"
+        IMAGE_TAG: ${{ inputs.semVer}} ##"reemplazar versionamiento semantico"
       run: |
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
