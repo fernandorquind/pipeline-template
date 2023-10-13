@@ -3,8 +3,10 @@ name: semantic-versioning
 on:
   workflow_call:   
 
-jobs:
+jobs: 
   semantic-versioning:
+    outputs:
+      semver: ${{ steps.gitversion.outputs.semVer }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout to project repository 
