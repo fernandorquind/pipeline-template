@@ -1,7 +1,11 @@
 name: semantic-versioning
 
 on:
-  workflow_call:   
+  workflow_call:
+    outputs:
+      semver:
+        description: "versionamiento semantico"
+        value: ${{ jobs.semantic-versioning.outputs.semver }}
 
 jobs: 
   semantic-versioning:
