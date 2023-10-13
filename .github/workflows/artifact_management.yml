@@ -2,10 +2,10 @@ name: artifact-management
 
 on:
   workflow_call:
-  inputs:
-    SemVer:
-      description: "Versionamiento semantico"
-      value: string
+    inputs:
+      SemVer:
+        description: "Versionamiento semantico"
+        value: string
 
 jobs:
   artifact-management:
