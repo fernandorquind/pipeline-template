@@ -13,7 +13,7 @@ jobs:
     name: artifact-management
     uses: ./.github/workflows/artifact_management.yml
     with:
-      SemVer: ${{ needs.development_integration.SemVer }}
+      SemVer: ${{ needs.development-integration.SemVer }}
     secrets: inherit
 
  
