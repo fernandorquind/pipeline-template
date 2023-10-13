@@ -3,9 +3,9 @@ name: development integration
 on:
   workflow_call:
     outputs:
-    SemVer:
-      description: "Versionamiento semantico"
-      value: ${{jobs.version.outputs.SemVer}}
+      SemVer:
+        description: "Versionamiento semantico"
+        value: ${{jobs.version.outputs.SemVer}}
 
 
 jobs:
